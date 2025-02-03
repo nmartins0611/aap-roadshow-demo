@@ -1,6 +1,6 @@
 ---
 - name: Connecting to Leaf
-  hosts: Delivery_Network
+  hosts: Core
   connection: local
   gather_facts: false
 
