@@ -1,6 +1,6 @@
 ---
 - name: Connecting to Leaf
-  hosts: switches
+  hosts: ceos01
   connection: local
   gather_facts: false
 
