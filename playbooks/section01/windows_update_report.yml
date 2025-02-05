@@ -30,13 +30,13 @@
         src: templates/win_patch_report.html.j2
         dest: C:\inetpub\wwwroot\index.html
         force: true  
-      notify: restart_iis
+   #   notify: restart_iis
       vars:
         updates: "{{ update_result.updates }}" 
         
-  handlers:
-    - name: restart_iis
-      ansible.windows.win_service:
-        name: W3Svc
-        state: restarted
-        start_mode: auto
+  # handlers:
+  #   - name: restart_iis
+  #     ansible.windows.win_service:
+  #       name: W3Svc
+  #       state: restarted
+  #       start_mode: auto
