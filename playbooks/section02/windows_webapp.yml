@@ -61,14 +61,14 @@
        src: C:\repo\lab-resources\
        dest: C:\inetpub\wwwroot
        remote_src: true
-      notify: restart_iis
+  #     notify: restart_iis
 
-  handlers:
-    - name: restart_iis
-      ansible.windows.win_service:
-        name: W3Svc
-        state: restarted
-        start_mode: auto
+  # handlers:
+  #   - name: restart_iis
+  #     ansible.windows.win_service:
+  #       name: W3Svc
+  #       state: restarted
+  #       start_mode: auto
 
 
 
