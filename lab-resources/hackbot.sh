@@ -1,5 +1,5 @@
 #!/bin/bash
-
+## Added token reset
 # File to store the token
 TOKEN_FILE="auth_token.txt"
 
