@@ -5,6 +5,12 @@
   ignore_errors: true
   
   tasks:
+  
+   - name: Pause for dramatic effect
+     ansible.builtin.pause:
+       prompt: "Pausing for dramtic effect - so you can see EDA"
+       secounds: 10
+  
     - name: Add InvalidDirectiveHere
       lineinfile:
         path: /etc/httpd/conf/httpd.conf
