@@ -6,8 +6,8 @@
   
   tasks:
   
-   - name: Pause for dramatic effect
-     ansible.builtin.pause:
+    - name: Pause for dramatic effect
+      ansible.builtin.pause:
        prompt: "Pausing for dramtic effect - so you can see EDA"
        secounds: 10
   
