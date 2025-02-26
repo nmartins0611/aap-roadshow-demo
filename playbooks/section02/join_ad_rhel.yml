@@ -99,15 +99,15 @@
           msg: "Join failed or already joined"
          when: join_output.rc != 0
 
-     # rescue:
+     rescue:
 
-     #   - name: Restore original DNS
-     #     ansible.builtin.copy:
-     #       src: /tmp/resolv.conf
-     #       dest: /etc/resolv.conf
-     #       remote_src: yes
-     #       mode: '0644'
+       - name: Restore original DNS
+         ansible.builtin.copy:
+           src: /tmp/resolv.conf
+           dest: /etc/resolv.conf
+           remote_src: yes
+           mode: '0644'
 
-       # - name: Error
-       #   debug:
-       #     msg: "Please re-run the template with the correct provided domain/forest"
+       - name: Error
+         debug:
+           msg: "Please re-run the template with the correct provided domain/forest"
