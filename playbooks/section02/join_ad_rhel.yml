@@ -57,6 +57,13 @@
 
       #### RHEL Tasks 
 
+   - name: Backup DNS file
+     ansible.builtin.copy:
+       src: /etc/resolv.conf
+       dest: /etc/resolv.bk
+       remote_src: yes
+       mode: '0644'
+
    - name: Add DNS from AD to /etc/resolv
      lineinfile:
        path: /etc/resolv.conf
@@ -92,13 +99,15 @@
           msg: "Join failed or already joined"
          when: join_output.rc != 0
 
-       # - name: Realm Listing
-       #   ansible.builtin.command: /bin/bash -c "realm list"
-       #   register: domain_list
+     rescue:
 
-       # - name: Output Realm list
-       #   debug:
-       #    msg: "{{ domain_list }}"
+       - name: Restore original DNS
+         ansible.builtin.copy:
+           src: /etc/resolv.bk
+           dest: /etc/resolv.conf
+           remote_src: yes
+           mode: '0644'
 
-         
-   
+       - name: Error
+         debug:
+           msg: "Please re-run the template with the correct provided domain/forest"
