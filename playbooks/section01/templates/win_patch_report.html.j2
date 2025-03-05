@@ -77,7 +77,6 @@
         <h1>Windows Update Report</h1>
     </header>
     <main>
-   ##     <p><strong>Date Generated:</strong> {{ ansible_date_time.date }}</p>
         <p><strong>Reboot Required:</strong> {{ reboot_required | default(false) }}</p>
 
         <h2>Available Updates</h2>
@@ -163,7 +162,7 @@
         {% endif %}
     </main>
     <footer>
-        <p>&copy; {{ ansible_date_time.year }} Windows Update Report build by <strong> Ansible </strong> </p>
+        <p>&copy; Windows Update Report build by <strong> Ansible </strong> </p>
     </footer>
 </body>
 </html>
