@@ -1,83 +1,337 @@
-/* Most of this CSS stuff is copypasta from https://www.w3schools.com */
-/* To generate your own CSS stylesheet, see: https://www.w3schools.com/css/css_templates.asp*/
-
-/* Note that we use a variable from the playbook to tune the navbar width ( {{ nav_width|default('200') }} )*/
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-/* Style the side navigation */
-.sidenav {
-  height: 100%;
-  width: {{ nav_width | default('200px') }};
-  position: fixed;
-  z-index: 1;
-  top: 0;
-  left: 0;
-  background-color: #111;
-  overflow-x: hidden;
-}
-
-/* Side navigation links */
-.sidenav a {
-  color: white;
-  padding: 8px;
-  text-decoration: none;
-  display: block;
-  text-align: left;
-  font-weight: normal;
-  font-size: small;
-}
-
-/* Side navigation text */
-.sidenav p {
-  color: lightgray;
-  padding: 5px;
-  text-decoration: none;
-  display: block;
-  text-align: center;
-  font-weight: bold;
-}
-
-/* Change color on hover */
-.sidenav a:hover {
-  background-color: #ddd;
-  color: black;
-}
-
-/* Style the content */
-.content {
-  margin-left: {{ nav_width | default('200px') }};
-  padding-left: 10px;
-}
-
-/* Used for any "command output" boxes */
-.code {
-  background: #f9f9f9 none repeat scroll 0 0;
-  border: 1px solid #aaa;
-  display: table;
-  font-size: 100%;
-  font-family: monospace;
-  margin-bottom: 1em;
-  padding: 10px;
-  width: 95%;
-}
-
-/* Enable smart text-wrapping for any 'pre' tags (command output) */
-pre { white-space: pre-wrap; }
-
-/* Misc. formatting for tables, headers, etc */
-table { border:1px solid grey; }
-th {
-  padding: 2px;
-  border: 1px solid grey;
-}
-td { padding: 2px; }
-h2 {color: blue;}
-h3 {color: blue;}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Most of this CSS stuff is copypasta from https://www.w3schools.com */
+    /* To generate your own CSS stylesheet, see: https://www.w3schools.com/css/css_templates.asp*/
+    /* Note that we use a variable from the playbook to tune the navbar width ( {{ nav_width|default('200') }} )*/
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: #111;
+      color: #e0e0e0;
+    }
+    
+    /* Style the top navigation */
+    .topnav {
+      height: 70px;
+      width: 100%;
+      position: fixed;
+      z-index: 1;
+      top: 0;
+      left: 0;
+      background-color: #1a1a1a;
+      overflow-x: hidden;
+      border-bottom: 1px solid #333;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+    }
+    
+    /* Top navigation logo */
+    .topnav .logo {
+      margin: 0 20px;
+    }
+    
+    .topnav .logo img {
+      height: 40px;
+      width: auto;
+      border-radius: 5px;
+      filter: drop-shadow(0 0 5px rgba(204, 0, 0, 0.5));
+    }
+    
+    /* Top navigation links */
+    .topnav a {
+      color: #e0e0e0;
+      padding: 10px 15px;
+      text-decoration: none;
+      display: inline-block;
+      text-align: left;
+      font-weight: normal;
+      font-size: 14px;
+      margin: 0 3px;
+      border-radius: 4px;
+      transition: all 0.3s;
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    /* Top navigation text */
+    .topnav p {
+      color: #e0e0e0;
+      padding: 5px;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+      font-weight: bold;
+      margin: 0 10px 0 20px;
+    }
+    
+    /* Change color on hover */
+    .topnav a:hover {
+      background-color: #900;
+      color: white;
+      box-shadow: 0 0 15px rgba(204, 0, 0, 0.5);
+    }
+    
+    /* Style the content */
+    .content {
+      margin-top: 70px;
+      padding: 20px;
+      background-color: #1a1a1a;
+      min-height: 100vh;
+      max-width: 1400px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    }
+    
+    /* Used for any "command output" boxes */
+    .code {
+      background: #222 none repeat scroll 0 0;
+      border: 1px solid #444;
+      display: table;
+      font-size: 100%;
+      font-family: monospace;
+      margin-bottom: 1em;
+      padding: 10px;
+      width: 95%;
+      color: #9ce;
+    }
+    
+    /* Enable smart text-wrapping for any 'pre' tags (command output) */
+    pre { 
+      white-space: pre-wrap; 
+      background-color: #222;
+      color: #9ce;
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid #444;
+    }
+    
+    /* Misc. formatting for tables, headers, etc */
+    table { 
+      border: 1px solid #444;
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 20px;
+      background-color: #222;
+    }
+    
+    th {
+      padding: 10px;
+      border: 1px solid #444;
+      background-color: #900;
+      color: white;
+      text-align: left;
+    }
+    
+    td { 
+      padding: 8px;
+      border: 1px solid #333;
+    }
+    
+    tr:nth-child(even) { 
+      background-color: rgba(255, 255, 255, 0.03);
+    }
+    
+    tr:hover {
+      background-color: rgba(204, 0, 0, 0.1); 
+    }
+    
+    h1 {
+      color: #c00;
+      border-bottom: 2px solid #c00;
+      padding-bottom: 5px;
+      text-shadow: 0 0 10px rgba(204, 0, 0, 0.3);
+    }
+    
+    h2 {
+      color: #c00;
+      margin-top: 25px;
+      text-shadow: 0 0 10px rgba(204, 0, 0, 0.3);
+    }
+    
+    h3 {
+      color: #c00;
+      text-shadow: 0 0 10px rgba(204, 0, 0, 0.3);
+    }
+    
+    /* Summary cards */
+    .summary-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin: 20px 0;
+    }
+    
+    .card {
+      flex: 1 1 200px;
+      background: #222;
+      border-radius: 6px;
+      padding: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      border-left: 4px solid #c00;
+      transition: all 0.3s;
+    }
+    
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    }
+    
+    .card h3 {
+      font-size: 16px;
+      color: #bbb;
+      margin-bottom: 10px;
+      text-shadow: none;
+    }
+    
+    .card .count {
+      font-size: 32px;
+      font-weight: 700;
+      color: #e0e0e0;
+    }
+    
+    .success {
+      border-color: #28a745;
+    }
+    
+    .success .count {
+      color: #28a745;
+    }
+    
+    .failed {
+      border-color: #dc3545;
+    }
+    
+    .failed .count {
+      color: #dc3545;
+    }
+    
+    .missing {
+      border-color: #ffc107;
+    }
+    
+    .missing .count {
+      color: #ffc107;
+    }
+    
+    .total {
+      border-color: #007bff;
+    }
+    
+    .total .count {
+      color: #007bff;
+    }
+    
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 15px;
+      font-size: 12px;
+      background-color: #1a1a1a;
+      color: #888;
+      border-top: 1px solid #333;
+      margin-top: 30px;
+    }
+    
+    footer strong {
+      color: #c00;
+    }
+    
+    /* Responsive design */
+    @media screen and (max-width: 768px) {
+      .topnav {
+        height: auto;
+        flex-direction: column;
+        padding: 10px 0;
+      }
+      
+      .content {
+        margin-top: 130px;
+      }
+      
+      .summary-cards {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="topnav">
+    <div class="logo">
+      <img src="https://github.com/nmartins0611/aap25-roadshow-content/blob/main/playbooks/section01/templates/ansible.png?raw=true" alt="Ansible">
+    </div>
+    <p><a style="text-align:center;font-weight:bold;font-size:medium;background-color:transparent;box-shadow:none;" href="#summary">Summary</a></p>
+    <p>Host Results:</p>
+    {% for item in ansible_play_hosts_all | sort %}
+    <a {% if item in hostvars['localhost']['failed_list'] %}style="color: #ff6347;"{% elif item in hostvars['localhost']['missing_list'] %}style="color: #ffcc00;"{% endif %} href="#{{ item }}">{{ item }}</a>
+    {% endfor %}
+  </div>
+  
+  <div class="content">
+    <h1 id="top">Infrastructure Report</h1>
+    <p><i>Job started {{ hostvars['localhost']['date_str_pretty'] }}</i></p>
+    <hr style="border-color: #333; margin: 20px 0;">
+    
+    <h1 id="summary">Summary</h1>
+    
+    <div class="summary-cards">
+      <div class="card success">
+        <h3><i class="fas fa-check-circle"></i> Successful</h3>
+        <div class="count">{{ hostvars['localhost']['success_list']|length }}</div>
+      </div>
+      
+      <div class="card failed">
+        <h3><i class="fas fa-times-circle"></i> Failed</h3>
+        <div class="count">{{ hostvars['localhost']['failed_list']|length }}</div>
+      </div>
+      
+      <div class="card missing">
+        <h3><i class="fas fa-question-circle"></i> Missing</h3>
+        <div class="count">{{ hostvars['localhost']['missing_list']|length }}</div>
+      </div>
+      
+      <div class="card total">
+        <h3><i class="fas fa-server"></i> Total</h3>
+        <div class="count">{{ hostvars['localhost']['success_list']|length + hostvars['localhost']['failed_list']|length + hostvars['localhost']['missing_list']|length }}</div>
+      </div>
+    </div>
+    
+    <h2>Kernel Versions across Environment</h2>
+    <table>
+      {% for item in hostvars['localhost']['kernels_list'] %}
+      <tr><th>Kernel {{ item }}</th></tr>
+      <tr><td>{{ hostvars | dict2items | json_query('[?value.ansible_kernel==`' + item + '`].key') | join(' ') | default('NO KERNELS FOUND') }}</td></tr>
+      {% endfor %}
+    </table>
+    
+    {% for thehost in ansible_play_hosts_all | sort %}
+      {% include './job_report_host.j2' %}
+    {% endfor %}
+    
+    <footer>
+      <p>Generated by <strong>Ansible</strong></p>
+    </footer>
+  </div>
+  
+  <script>
+    // Add smooth scrolling
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+  </script>
+</body>
+</html>
