@@ -11,9 +11,9 @@
 
   tasks:
 
-   - name: To view dns_domain from network segment
-     ansible.builtin.debug:
-      msg: "{{ ansible_interfaces[0].dns_domain }}"
+   # - name: To view dns_domain from network segment
+   #   ansible.builtin.debug:
+   #    msg: "{{ ansible_interfaces[0].dns_domain }}"
 
    - name: Ensure local Administrator account has a password
      ansible.windows.win_user:
