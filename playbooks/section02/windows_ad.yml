@@ -2,7 +2,7 @@
 - 
   name: Configure Windows Server as Domain Controller
   hosts: domain_controllers
-  gather_facts: true
+  gather_facts: false
 
   vars_files:
     - windows_auth
