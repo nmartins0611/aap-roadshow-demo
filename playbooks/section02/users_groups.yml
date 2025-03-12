@@ -36,12 +36,12 @@
    #   set_fact:
    #     ou_path: "OU={{ org_unit }},{{ formatted_domain }}"
 
-   - name: Create a group in an OU
-     microsoft.ad.group:
-      identity: "{{ group_name }}"
-      scope: global
-      path: "{{ ou_path }}"
-      state: present
+   # - name: Create a group in an OU
+   #   microsoft.ad.group:
+   #    identity: "{{ group_name }}"
+   #    scope: global
+   #    path: "{{ ou_path }}"
+   #    state: present
 
    - name: Create users for lab
      microsoft.ad.user:
