@@ -2,7 +2,7 @@
 - 
   name: Create Organizational Units and Groups
   hosts: domain_controllers
-  gather_facts: true
+  gather_facts: false
 
   vars:
    org_unit: 
