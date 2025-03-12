@@ -1,6 +1,6 @@
 ---
 - name: Reg rhel with subs and insights 
-  hosts: rhel
+  hosts: node01
   become: true
   collections:
     - redhat.rhel_system_roles
