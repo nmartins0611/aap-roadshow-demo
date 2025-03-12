@@ -19,21 +19,21 @@
       state: present
       protect_from_deletion: true
 
-   - name: Get DC details
-     set_fact:
-      domain_name: "{{ ansible_interfaces[0].dns_domain }}"
+   # - name: Get DC details
+   #   set_fact:
+   #    domain_name: "{{ ansible_interfaces[0].dns_domain }}"
 
-   - name: Remove trailing dot
-     set_fact:
-      domain_cleaned: "{{ domain_name | regex_replace('\\.$', '') }}"
+   # - name: Remove trailing dot
+   #   set_fact:
+   #    domain_cleaned: "{{ domain_name | regex_replace('\\.$', '') }}"
 
-   - name: Split domain and reformat as DC=value
-     set_fact:
-      formatted_domain: "{{ domain_cleaned.split('.') | map('regex_replace', '^', 'DC=') | join(', ') }}"
+   # - name: Split domain and reformat as DC=value
+   #   set_fact:
+   #    formatted_domain: "{{ domain_cleaned.split('.') | map('regex_replace', '^', 'DC=') | join(', ') }}"
 
-   - name: Create OU Path
-     set_fact:
-       ou_path: "OU={{ org_unit }},{{ formatted_domain }}"
+   # - name: Create OU Path
+   #   set_fact:
+   #     ou_path: "OU={{ org_unit }},{{ formatted_domain }}"
 
    - name: Create a group in an OU
      microsoft.ad.group:
