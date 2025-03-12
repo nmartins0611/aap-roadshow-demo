@@ -14,11 +14,11 @@
 
   tasks:
 
-   - name: Create Organizational Unit
-     microsoft.ad.ou:
-      name: "{{ org_unit }}"
-      state: present
-      protect_from_deletion: true
+   # - name: Create Organizational Unit
+   #   microsoft.ad.ou:
+   #    name: "{{ org_unit }}"
+   #    state: present
+   #    protect_from_deletion: true
 
    # - name: Get DC details
    #   set_fact:
