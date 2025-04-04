@@ -14,10 +14,10 @@
 
   tasks:
 
-    - name: Pause for dramatic effect
-      ansible.builtin.pause:
-       prompt: "Pausing for dramtic effect - so you can see EDA Magic"
-       secounds: 5
+    # - name: Pause for dramatic effect
+    #   ansible.builtin.pause:
+    #    prompt: "Pausing for dramtic effect - so you can see EDA Magic"
+    #    secounds: 5
 
     - name: Backup arista configuration
       arista.eos.eos_config:
