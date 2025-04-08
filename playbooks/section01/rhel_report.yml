@@ -3,7 +3,6 @@
   hosts: Streaming_Infrastucture
   gather_facts: true
   become: true
-
   vars:
     outdir: /var/tmp/reports
     nav_width: 200px
@@ -11,7 +10,6 @@
     missing_style: 'color:grey;text-decoration:line-through'
     report_type:
     backup_file: "/backup/data_{{ inventory_hostname }}_{{ ansible_date_time.date }}_{{ ansible_date_time.time | replace(':', '') }}.xfsdump"
-
   pre_tasks:
        
     - name: Set initial job status to catch missing/failed hosts
@@ -25,40 +23,86 @@
     - name: Set remaining hosts as not missing
       set_fact:
         missing: False
-
   tasks:
-
     - name: Create output folder
       file:
         path: "{{ outdir }}"
         state: directory
 
+    # New tasks for checking pending updates
+    - name: Check for outstanding package updates (RHEL/CentOS)
+      shell: yum check-update --quiet | grep -v "^$" | grep -v "Loaded plugins"
+      register: package_updates
+      failed_when: package_updates.rc != 0 and package_updates.rc != 100
+      changed_when: False
+      when: ansible_os_family == "RedHat"
+      
+    - name: Check for security updates only (RHEL/CentOS)
+      shell: yum updateinfo list security --quiet | grep -v "^$" | grep -v "Loaded plugins"
+      register: security_updates
+      failed_when: False
+      changed_when: False
+      when: ansible_os_family == "RedHat"
+      
+    - name: Check for outstanding package updates (Debian/Ubuntu)
+      shell: apt list --upgradable 2>/dev/null | grep -v "Listing..."
+      register: debian_package_updates
+      failed_when: False
+      changed_when: False
+      when: ansible_os_family == "Debian"
+      
+    - name: Check for security updates only (Debian/Ubuntu)
+      shell: apt list --upgradable 2>/dev/null | grep -i security
+      register: debian_security_updates
+      failed_when: False
+      changed_when: False
+      when: ansible_os_family == "Debian"
+        
     - name: Gather storage capacity
       shell: df -h --total | grep total
       register: storageusage
       when: report_type == "Storage Usage" or report_type == "All"
-
     - name: Gather OS version
       command: cat /etc/redhat-release
       register: os_version
       when: report_type == "OS Versions" or report_type == "All"
-
     - name: Gather list of users
       command: cat /etc/passwd
       register: userlist
       when: report_type == "User List" or report_type == "All"
-
     - name: Verify the dumps
       ansible.builtin.command:
         cmd: ls -l "{{ backup_file | dirname }}"
       register: dir_listing
-
   post_tasks:
-
     - name: Mark surviving hosts as successful
       set_fact:
         job_success: True
-
+    
+    # Calculate update statistics for each host
+    - name: Set update statistics
+      set_fact:
+        has_updates: "{{ (ansible_os_family == 'RedHat' and package_updates.rc == 100) or 
+                        (ansible_os_family == 'Debian' and debian_package_updates.stdout | length > 0) }}"
+        has_security_updates: "{{ (ansible_os_family == 'RedHat' and security_updates.stdout | length > 0) or 
+                                  (ansible_os_family == 'Debian' and debian_security_updates.stdout | length > 0) }}"
+        update_count: >-
+          {% if ansible_os_family == 'RedHat' and package_updates.rc == 100 %}
+          {{ package_updates.stdout_lines | length }}
+          {% elif ansible_os_family == 'Debian' and debian_package_updates.stdout | length > 0 %}
+          {{ debian_package_updates.stdout_lines | length }}
+          {% else %}
+          0
+          {% endif %}
+        security_update_count: >-
+          {% if ansible_os_family == 'RedHat' and security_updates.stdout | length > 0 %}
+          {{ security_updates.stdout_lines | length }}
+          {% elif ansible_os_family == 'Debian' and debian_security_updates.stdout | length > 0 %}
+          {{ debian_security_updates.stdout_lines | length }}
+          {% else %}
+          0
+          {% endif %}
+          
     # Saving curated lists of hosts as localhost facts, to make the Jinja loops easier to read in the template. 
     # To use: hostvars['localhost']['success_list'] , etc
     - name: Save summary facts under Ansible controller
@@ -72,21 +116,23 @@
         success_list: '{{ hostvars | dict2items | json_query(success_query) }}'
         failed_list: '{{ hostvars | dict2items | json_query(failed_query) }}'
         missing_list: '{{ hostvars | dict2items | json_query(missing_query) }}'
+        hosts_with_updates: '{{ hostvars | dict2items | json_query(updates_query) }}'
+        hosts_with_security_updates: '{{ hostvars | dict2items | json_query(security_updates_query) }}'
       vars:
         kernel_query: "*.ansible_kernel"
         success_query: "[?value.job_success==`true`].key"
         failed_query: "[?value.job_success==`false` && value.missing==`false`].key"
         missing_query: "[?value.missing==`true`].key"
+        updates_query: "[?value.has_updates==`true`].{host: key, count: value.update_count}"
+        security_updates_query: "[?value.has_security_updates==`true`].{host: key, count: value.security_update_count}"
         date: "{{ '%Y-%m-%d' | strftime }}"
         hms_pretty: "{{ '%H:%M:%S' | strftime }}"
         hms: "{{ hms_pretty | replace(':','-') }}"
-
     - name: Save job report
       template:
         src: job_report_master.j2
         dest: "{{ outdir }}/report.html"
       delegate_to: node03
-
     - name: Copy application files to shared storage
       ansible.builtin.copy:
         src: "{{ outdir }}/report.html"
@@ -94,5 +140,102 @@
         remote_src: true
         force: yes
       delegate_to: node03
+
+# ---
+# - name: Gather system data and create HTML report
+#   hosts: Streaming_Infrastucture
+#   gather_facts: true
+#   become: true
+
+#   vars:
+#     outdir: /var/tmp/reports
+#     nav_width: 200px
+#     failed_style: 'color:orangered'
+#     missing_style: 'color:grey;text-decoration:line-through'
+#     report_type:
+#     backup_file: "/backup/data_{{ inventory_hostname }}_{{ ansible_date_time.date }}_{{ ansible_date_time.time | replace(':', '') }}.xfsdump"
+
+#   pre_tasks:
+       
+#     - name: Set initial job status to catch missing/failed hosts
+#       set_fact:
+#         job_success: False
+#         missing: True
+    
+#     - name: Gather server facts and weed out unavailable hosts
+#       setup:
+    
+#     - name: Set remaining hosts as not missing
+#       set_fact:
+#         missing: False
+
+#   tasks:
+
+#     - name: Create output folder
+#       file:
+#         path: "{{ outdir }}"
+#         state: directory
+
+#     - name: Gather storage capacity
+#       shell: df -h --total | grep total
+#       register: storageusage
+#       when: report_type == "Storage Usage" or report_type == "All"
+
+#     - name: Gather OS version
+#       command: cat /etc/redhat-release
+#       register: os_version
+#       when: report_type == "OS Versions" or report_type == "All"
+
+#     - name: Gather list of users
+#       command: cat /etc/passwd
+#       register: userlist
+#       when: report_type == "User List" or report_type == "All"
+
+#     - name: Verify the dumps
+#       ansible.builtin.command:
+#         cmd: ls -l "{{ backup_file | dirname }}"
+#       register: dir_listing
+
+#   post_tasks:
+
+#     - name: Mark surviving hosts as successful
+#       set_fact:
+#         job_success: True
+
+#     # Saving curated lists of hosts as localhost facts, to make the Jinja loops easier to read in the template. 
+#     # To use: hostvars['localhost']['success_list'] , etc
+#     - name: Save summary facts under Ansible controller
+#       delegate_to: localhost
+#       delegate_facts: True
+#       run_once: yes
+#       set_fact:
+#         date_str: "{{ date }}_{{ hms }}"
+#         date_str_pretty: "{{ date }} {{ hms_pretty }}"
+#         kernels_list: '{{ hostvars | json_query(kernel_query) | unique | sort }}'
+#         success_list: '{{ hostvars | dict2items | json_query(success_query) }}'
+#         failed_list: '{{ hostvars | dict2items | json_query(failed_query) }}'
+#         missing_list: '{{ hostvars | dict2items | json_query(missing_query) }}'
+#       vars:
+#         kernel_query: "*.ansible_kernel"
+#         success_query: "[?value.job_success==`true`].key"
+#         failed_query: "[?value.job_success==`false` && value.missing==`false`].key"
+#         missing_query: "[?value.missing==`true`].key"
+#         date: "{{ '%Y-%m-%d' | strftime }}"
+#         hms_pretty: "{{ '%H:%M:%S' | strftime }}"
+#         hms: "{{ hms_pretty | replace(':','-') }}"
+
+#     - name: Save job report
+#       template:
+#         src: job_report_master.j2
+#         dest: "{{ outdir }}/report.html"
+#       delegate_to: node03
+
+#     - name: Copy application files to shared storage
+#       ansible.builtin.copy:
+#         src: "{{ outdir }}/report.html"
+#         dest: /var/www/html/index.html
+#         remote_src: true
+#         force: yes
+#       delegate_to: node03
 
 
