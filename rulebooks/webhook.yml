@@ -1,6 +1,6 @@
 ---
 - name: Rulebook to print debug message based on webhook event
-  hosts: testHost
+  hosts: all
   gather_facts: false
 
   sources:
