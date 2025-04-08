@@ -639,7 +639,7 @@
       }
     });
     
-    // Function to trigger update job via webhook
+    // Function to trigger update job via server-side proxy
     function triggerUpdate(serverName) {
       // Get the button that was clicked
       const button = event.currentTarget;
@@ -648,8 +648,8 @@
       button.disabled = true;
       button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running...';
       
-      // Call the webhook
-      fetch('http://192.168.122.1:5000/endpoint', {
+      // Call our local proxy endpoint instead of the external webhook
+      fetch('/proxy/update', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
