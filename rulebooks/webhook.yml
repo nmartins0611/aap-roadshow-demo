@@ -9,25 +9,10 @@
           port: 5000
 
   rules:
-      - name: Trigger update
-        condition: 
-          event.payload.server_name == 'node01'
-        action:
-         run_job_template:
-          name: "Update RHEL"
-
-      # - name: Trigger update
-      #   condition: 
-      #     event.payload.server_name == 'node02'
-      #   action:
-      #    run_job_template:
-      #     name: update.yml
-
-      # - name: Trigger update
-      #   condition: 
-      #     event.payload.server_name == 'node03'
-      #   action:
-      #    run_job_template:
-      #     name: update.yml
-          
-           
+    - name: Trigger update
+      condition: event.payload.server_name == 'node01'
+      action:
+       run_job_template:
+        organization: "Default"
+        name: "Update RHEL"
+        post_events: true
