@@ -649,7 +649,7 @@
       button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running...';
       
       // Call the webhook
-      fetch('http://192.168.88.208:5000/webhook', {
+      fetch('https://controller.nostromo.io:5000/webhook', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -660,18 +660,55 @@
         })
       })
       .then(response => {
-        if (response.ok) {
-          return response.json();
-        }
-        throw new Error('Network response was not ok.');
+        // Store the status code for error reporting
+        const statusCode = response.status;
+        
+        // Try to parse the response as JSON
+        return response.text().then(text => {
+          try {
+            // Try to parse as JSON
+            const data = text ? JSON.parse(text) : {};
+            // Add status to the data
+            data.status = statusCode;
+            
+            if (!response.ok) {
+              // Extract error message if available
+              const errorMessage = data.error || data.message || `Server returned ${statusCode}`;
+              throw new Error(errorMessage);
+            }
+            
+            return data;
+          } catch (e) {
+            // If JSON parsing fails, create an object with the response text
+            if (!response.ok) {
+              throw new Error(text || `Server returned ${statusCode}`);
+            }
+            return { status: statusCode, text: text };
+          }
+        });
       })
       .then(data => {
         // Success - update the button to indicate that the update has been triggered
         button.innerHTML = '<i class="fas fa-check"></i> Scheduled';
         button.style.background = 'linear-gradient(135deg, #28a745 0%, #218838 100%)';
         
-        // Show a notification
-        showNotification(`Update job scheduled for ${serverName}`, 'success');
+        // Show a notification with any success message from the server
+        const message = data.message || data.success || `Update job scheduled for ${serverName}`;
+        showNotification(message, 'success');
+        
+        // Add small timestamp below the button
+        const timestamp = document.createElement('div');
+        timestamp.className = 'timestamp';
+        timestamp.textContent = new Date().toLocaleTimeString();
+        timestamp.style.fontSize = '10px';
+        timestamp.style.color = '#666';
+        timestamp.style.marginTop = '5px';
+        
+        const buttonContainer = button.parentElement;
+        if (buttonContainer.querySelector('.timestamp')) {
+          buttonContainer.querySelector('.timestamp').remove();
+        }
+        buttonContainer.appendChild(timestamp);
       })
       .catch(error => {
         // Error - update the button to indicate that the update failed
@@ -679,13 +716,15 @@
         button.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
         button.disabled = false;
         
-        // Show error notification
-        showNotification(`Failed to schedule update for ${serverName}: ${error.message}`, 'error');
+        console.error('Webhook error:', error);
+        
+        // Show detailed error notification
+        showNotification(`Failed to schedule update for ${serverName}: ${error.message}`, 'error', 10000);
       });
     }
     
     // Function to show notifications
-    function showNotification(message, type = 'info') {
+    function showNotification(message, type = 'info', duration = 5000) {
       // Create notification element
       const notification = document.createElement('div');
       notification.className = `notification ${type}`;
@@ -715,7 +754,9 @@
       notification.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
       notification.style.zIndex = '9999';
       notification.style.minWidth = '300px';
+      notification.style.maxWidth = '500px';
       notification.style.animation = 'slideIn 0.3s ease-out forwards';
+      notification.style.wordBreak = 'break-word';
       
       // Set colors based on type
       if (type === 'success') {
@@ -735,11 +776,17 @@
       // Add to the document
       document.body.appendChild(notification);
       
-      // Remove after 5 seconds
+      // Remove after specified duration
       setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease-in forwards';
-        setTimeout(() => notification.remove(), 300);
-      }, 5000);
+        if (document.body.contains(notification)) {
+          notification.style.animation = 'slideOut 0.3s ease-in forwards';
+          setTimeout(() => {
+            if (document.body.contains(notification)) {
+              notification.remove();
+            }
+          }, 300);
+        }
+      }, duration);
     }
     
     // Add CSS animations
