@@ -1,0 +1,29 @@
+---
+- name: Update all packages on RHEL systems
+  hosts: node01  # Target inventory group containing your RHEL servers
+  become: true         # Run as root
+  gather_facts: true   # Gather system information
+
+  tasks:
+    - name: Check if system is RHEL
+      fail:
+        msg: "This playbook is intended for RHEL systems only"
+      when: ansible_distribution != "RedHat"
+
+    - name: Update package cache
+      yum:
+        update_cache: yes
+      register: cache_update
+      
+    - name: Show available updates
+      debug:
+        msg: "{{ check_update.stdout_lines }}"
+      when: check_update.rc == 100
+
+    - name: Update all packages
+      yum:
+        name: '*'
+        state: latest
+      register: update_result
+      
+  
