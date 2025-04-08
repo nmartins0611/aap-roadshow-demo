@@ -344,6 +344,768 @@
       color: white;
     }
     
+    .update-button {
+      background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .update-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+    }
+    
+    .update-button i {
+      font-size: 14px;
+    }
+    
+    .update-button:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
+    
+    .update-details {
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 12px;
+      background-color: #f5f5f5;
+      padding: 10px;
+      border-radius: 5px;
+      white-space: pre-wrap;
+    }
+    
+    .update-details::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .update-details::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 4px;
+    }
+    
+    .update-details::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+    
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 12px;
+      background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+      color: #fff;
+      border-radius: 0 0 10px 10px;
+      margin-top: 40px;
+    }
+    
+    footer p {
+      opacity: 0.8;
+    }
+    
+    footer strong {
+      color: #c00;
+      font-weight: 700;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .topnav-content {
+        flex-direction: column;
+        height: auto;
+        padding: 10px;
+      }
+      
+      .topnav .logo {
+        margin-right: 0;
+        margin-bottom: 10px;
+      }
+      
+      .topnav .summary-link {
+        margin: 10px 0;
+      }
+      
+      .host-menu {
+        width: 100%;
+        justify-content: center;
+        padding-bottom: 10px;
+      }
+      
+      .content {
+        margin-top: 140px;
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="topnav">
+    <div class="topnav-content">
+      <div class="logo">
+        <img src="https://github.com/nmartins0611/aap25-roadshow-content/blob/main/playbooks/section01/templates/ansible.png?raw=true" alt="Ansible">
+      </div>
+      <div class="summary-link">
+        <a href="#summary"><i class="fas fa-chart-pie"></i> Summary</a>
+      </div>
+      <div class="host-menu">
+        <p><i class="fas fa-server"></i> Host Results:</p>
+        {% for item in ansible_play_hosts_all | sort %}
+        <a {% if item in hostvars['localhost']['failed_list'] %}style="color: #ff6347; border: 1px solid rgba(255, 99, 71, 0.3);"
+           {% elif item in hostvars['localhost']['missing_list'] %}style="color: #ffcc00; border: 1px solid rgba(255, 204, 0, 0.3);"
+           {% elif item in hostvars['localhost']['hosts_with_security_updates'] | map(attribute='host') | list %}style="color: #ff0000; border: 1px solid rgba(255, 0, 0, 0.3);"
+           {% elif item in hostvars['localhost']['hosts_with_updates'] | map(attribute='host') | list %}style="color: #0056b3; border: 1px solid rgba(0, 86, 179, 0.3);"
+           {% else %}style="border: 1px solid rgba(255, 255, 255, 0.1);"{% endif %} href="#{{ item }}">{{ item }}</a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  
+  <div class="content">
+    <div class="page-header">
+      <div>
+        <h1 id="top">Infrastructure Report</h1>
+        <p class="datetime"><i class="far fa-clock"></i> Job started {{ hostvars['localhost']['date_str_pretty'] }}</p>
+      </div>
+    </div>
+    
+    <h1 id="summary">Summary</h1>
+    
+    <div class="summary-cards">
+      <div class="card success">
+        <h3><i class="fas fa-check-circle"></i> Successful</h3>
+        <div class="count">{{ hostvars['localhost']['success_list']|length }}</div>
+      </div>
+      
+      <div class="card failed">
+        <h3><i class="fas fa-times-circle"></i> Failed</h3>
+        <div class="count">{{ hostvars['localhost']['failed_list']|length }}</div>
+      </div>
+      
+      <div class="card missing">
+        <h3><i class="fas fa-question-circle"></i> Missing</h3>
+        <div class="count">{{ hostvars['localhost']['missing_list']|length }}</div>
+      </div>
+      
+      <div class="card total">
+        <h3><i class="fas fa-server"></i> Total</h3>
+        <div class="count">{{ hostvars['localhost']['success_list']|length + hostvars['localhost']['failed_list']|length + hostvars['localhost']['missing_list']|length }}</div>
+      </div>
+      
+      <div class="card updates">
+        <h3><i class="fas fa-sync-alt"></i> Updates</h3>
+        <div class="count">{{ hostvars['localhost']['hosts_with_updates']|length }}</div>
+      </div>
+      
+      <div class="card security">
+        <h3><i class="fas fa-shield-alt"></i> Security</h3>
+        <div class="count">{{ hostvars['localhost']['hosts_with_security_updates']|length }}</div>
+      </div>
+    </div>
+    
+    <h2 id="updates"><i class="fas fa-sync-alt"></i> Outstanding Updates</h2>
+    {% if hostvars['localhost']['hosts_with_updates']|length > 0 %}
+    <div class="table-container">
+      <table>
+        <tr>
+          <th>Host</th>
+          <th>Count</th>
+          <th>Details</th>
+        </tr>
+        {% for host_info in hostvars['localhost']['hosts_with_updates'] %}
+        <tr>
+          <td>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <a href="#{{ host_info.host }}">{{ host_info.host }}</a>
+              {% if host_info.host in hostvars['localhost']['hosts_with_security_updates'] | map(attribute='host') | list %}
+              <span class="update-badge security-update"><i class="fas fa-shield-alt"></i> Security</span>
+              {% else %}
+              <span class="update-badge regular-update"><i class="fas fa-sync-alt"></i> Updates</span>
+              {% endif %}
+              <button onclick="triggerUpdate('{{ host_info.host }}')" class="update-button">
+                <i class="fas fa-rocket"></i> Update
+              </button>
+            </div>
+          </td>
+          <td>{{ host_info.count }}</td>
+          <td>
+            <div class="update-details">
+              {% if hostvars[host_info.host]['ansible_os_family'] == 'RedHat' %}
+              {{ hostvars[host_info.host]['package_updates'].stdout }}
+              {% elif hostvars[host_info.host]['ansible_os_family'] == 'Debian' %}
+              {{ hostvars[host_info.host]['debian_package_updates'].stdout }}
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+    {% else %}
+    <div class="card success">
+      <h3><i class="fas fa-check-circle"></i> All Systems Up to Date</h3>
+      <p>No outstanding updates found on any systems.</p>
+    </div>
+    {% endif %}
+    
+    <h2 id="security-updates"><i class="fas fa-shield-alt"></i> Security Updates</h2>
+    {% if hostvars['localhost']['hosts_with_security_updates']|length > 0 %}
+    <div class="table-container">
+      <table>
+        <tr>
+          <th>Host</th>
+          <th>Count</th>
+          <th>Details</th>
+        </tr>
+        {% for host_info in hostvars['localhost']['hosts_with_security_updates'] %}
+        <tr>
+          <td>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <a href="#{{ host_info.host }}">{{ host_info.host }}</a>
+              <span class="update-badge security-update"><i class="fas fa-shield-alt"></i> Security</span>
+              <button onclick="triggerUpdate('{{ host_info.host }}')" class="update-button">
+                <i class="fas fa-rocket"></i> Update
+              </button>
+            </div>
+          </td>
+          <td>{{ host_info.count }}</td>
+          <td>
+            <div class="update-details">
+              {% if hostvars[host_info.host]['ansible_os_family'] == 'RedHat' %}
+              {{ hostvars[host_info.host]['security_updates'].stdout }}
+              {% elif hostvars[host_info.host]['ansible_os_family'] == 'Debian' %}
+              {{ hostvars[host_info.host]['debian_security_updates'].stdout }}
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+    {% else %}
+    <div class="card success">
+      <h3><i class="fas fa-check-circle"></i> All Systems Secure</h3>
+      <p>No security updates required on any systems.</p>
+    </div>
+    {% endif %}
+    
+    <h2><i class="fas fa-microchip"></i> Kernel Versions across Environment</h2>
+    <div class="table-container">
+      <table>
+        {% for item in hostvars['localhost']['kernels_list'] %}
+        <tr><th>Kernel {{ item }}</th></tr>
+        <tr><td>{{ hostvars | dict2items | json_query('[?value.ansible_kernel==`' + item + '`].key') | join(' ') | default('NO KERNELS FOUND') }}</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+    
+    {% for thehost in ansible_play_hosts_all | sort %}
+      {% include './job_report_host.j2' %}
+    {% endfor %}
+    
+    <footer>
+      <p>Generated by <strong>Ansible</strong> <i class="fas fa-robot"></i></p>
+    </footer>
+  </div>
+  
+  <script>
+    // Add smooth scrolling
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+    
+    // Add shadow to nav on scroll
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 10) {
+        document.querySelector('.topnav').style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.3)';
+      } else {
+        document.querySelector('.topnav').style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
+      }
+    });
+    
+    // Function to trigger update job via API
+    function triggerUpdate(serverName) {
+      // Get the button that was clicked
+      const button = event.currentTarget;
+      
+      // Disable the button and change its text to indicate that the update is in progress
+      button.disabled = true;
+      button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running...';
+      
+      // Call the API
+      fetch('http://system.api/update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          server: serverName,
+          action: 'update'
+        })
+      })
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        }
+        throw new Error('Network response was not ok.');
+      })
+      .then(data => {
+        // Success - update the button to indicate that the update has been triggered
+        button.innerHTML = '<i class="fas fa-check"></i> Scheduled';
+        button.style.background = 'linear-gradient(135deg, #28a745 0%, #218838 100%)';
+        
+        // Show a notification
+        showNotification(`Update job scheduled for ${serverName}`, 'success');
+      })
+      .catch(error => {
+        // Error - update the button to indicate that the update failed
+        button.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Failed';
+        button.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
+        button.disabled = false;
+        
+        // Show error notification
+        showNotification(`Failed to schedule update for ${serverName}: ${error.message}`, 'error');
+      });
+    }
+    
+    // Function to show notifications
+    function showNotification(message, type = 'info') {
+      // Create notification element
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      
+      // Set icon based on notification type
+      let icon = 'info-circle';
+      if (type === 'success') icon = 'check-circle';
+      if (type === 'error') icon = 'exclamation-circle';
+      
+      notification.innerHTML = `
+        <i class="fas fa-${icon}"></i>
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()">
+          <i class="fas fa-times"></i>
+        </button>
+      `;
+      
+      // Add styles for the notification
+      notification.style.position = 'fixed';
+      notification.style.bottom = '20px';
+      notification.style.right = '20px';
+      notification.style.padding = '15px 20px';
+      notification.style.borderRadius = '5px';
+      notification.style.display = 'flex';
+      notification.style.alignItems = 'center';
+      notification.style.gap = '10px';
+      notification.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+      notification.style.zIndex = '9999';
+      notification.style.minWidth = '300px';
+      notification.style.animation = 'slideIn 0.3s ease-out forwards';
+      
+      // Set colors based on type
+      if (type === 'success') {
+        notification.style.backgroundColor = '#d4edda';
+        notification.style.color = '#155724';
+        notification.style.borderLeft = '4px solid #28a745';
+      } else if (type === 'error') {
+        notification.style.backgroundColor = '#f8d7da';
+        notification.style.color = '#721c24';
+        notification.style.borderLeft = '4px solid #dc3545';
+      } else {
+        notification.style.backgroundColor = '#d1ecf1';
+        notification.style.color = '#0c5460';
+        notification.style.borderLeft = '4px solid #17a2b8';
+      }
+      
+      // Add to the document
+      document.body.appendChild(notification);
+      
+      // Remove after 5 seconds
+      setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease-in forwards';
+        setTimeout(() => notification.remove(), 300);
+      }, 5000);
+    }
+    
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      
+      @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>
+
+{# <!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Base Font and Reset */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: "Overpass", "Red Hat Text", Arial, sans-serif;
+      background-color: #f8f9fa;
+      color: #333;
+      line-height: 1.6;
+    }
+    
+    /* Top Navigation Bar */
+    .topnav {
+      background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      position: fixed;
+      top: 0;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+    
+    .topnav-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      height: 70px;
+    }
+    
+    .topnav .logo {
+      padding: 10px 0;
+      margin-right: 30px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .topnav .logo img {
+      height: 40px;
+      width: auto;
+      border-radius: 5px;
+      transition: transform 0.3s;
+    }
+    
+    .topnav .logo img:hover {
+      transform: scale(1.05);
+    }
+    
+    .topnav .summary-link {
+      margin-right: 30px;
+      position: relative;
+    }
+    
+    .topnav .summary-link a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      padding: 10px 15px;
+      border-radius: 4px;
+      transition: all 0.3s;
+    }
+    
+    .topnav .summary-link a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+    }
+    
+    .topnav .summary-link a:after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: 0;
+      left: 15px;
+      background-color: #c00;
+      transition: width 0.3s;
+    }
+    
+    .topnav .summary-link a:hover:after {
+      width: calc(100% - 30px);
+    }
+    
+    .host-menu {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      flex-grow: 1;
+      overflow-x: auto;
+    }
+    
+    .host-menu::-webkit-scrollbar {
+      height: 4px;
+    }
+    
+    .host-menu::-webkit-scrollbar-thumb {
+      background: #900;
+      border-radius: 10px;
+    }
+    
+    .host-menu::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+    
+    .host-menu p {
+      color: #fff;
+      margin: 0 15px 0 0;
+      font-weight: 600;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .host-menu p i {
+      margin-right: 8px;
+      color: #c00;
+    }
+    
+    .host-menu a {
+      padding: 8px 12px;
+      margin: 0 4px;
+      text-decoration: none;
+      font-size: 14px;
+      color: #eee;
+      display: inline-block;
+      border-radius: 4px;
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+    
+    .host-menu a:hover {
+      background-color: #c00;
+      color: #fff;
+      box-shadow: 0 0 10px rgba(204, 0, 0, 0.4);
+      transform: translateY(-2px);
+    }
+    
+    /* Content Area */
+    .content {
+      padding: 30px;
+      background-color: #fff;
+      min-height: 100vh;
+      margin-top: 70px;
+      max-width: 1400px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.05);
+      border-radius: 0 0 10px 10px;
+    }
+    
+    .page-header {
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    h1 {
+      color: #c00;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 5px;
+      position: relative;
+      display: inline-block;
+    }
+    
+    h1:after {
+      content: "";
+      display: block;
+      width: 50px;
+      height: 3px;
+      background: #c00;
+      margin-top: 5px;
+    }
+    
+    h2 {
+      color: #c00;
+      font-size: 22px;
+      margin: 30px 0 15px;
+    }
+    
+    .datetime {
+      font-style: italic;
+      color: #777;
+      font-size: 14px;
+    }
+    
+    /* Summary Cards */
+    .summary-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin: 20px 0;
+    }
+    
+    .card {
+      flex: 1 1 200px;
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      border-left: 4px solid #c00;
+      transition: all 0.3s;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card h3 {
+      font-size: 16px;
+      color: #555;
+      margin-bottom: 15px;
+    }
+    
+    .card .count {
+      font-size: 32px;
+      font-weight: 700;
+      color: #333;
+    }
+    
+    .success {
+      border-color: #28a745;
+    }
+    
+    .success .count {
+      color: #28a745;
+    }
+    
+    .failed {
+      border-color: #dc3545;
+    }
+    
+    .failed .count {
+      color: #dc3545;
+    }
+    
+    .missing {
+      border-color: #ffc107;
+    }
+    
+    .missing .count {
+      color: #ffc107;
+    }
+    
+    .total {
+      border-color: #007bff;
+    }
+    
+    .total .count {
+      color: #007bff;
+    }
+    
+    .updates {
+      border-color: #0056b3;
+    }
+    
+    .updates .count {
+      color: #0056b3;
+    }
+    
+    .security {
+      border-color: #bb0000;
+    }
+    
+    .security .count {
+      color: #bb0000;
+    }
+    
+    /* Tables */
+    .table-container {
+      margin: 30px 0;
+      overflow-x: auto;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      background: #fff;
+    }
+    
+    table th, table td {
+      padding: 12px 15px;
+      text-align: left;
+      border: none;
+    }
+    
+    table th {
+      background: linear-gradient(135deg, #900 0%, #c00 100%);
+      color: white;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 14px;
+      letter-spacing: 0.5px;
+    }
+    
+    table tr:nth-child(even) {
+      background-color: #f7f7f7;
+    }
+    
+    table tr {
+      transition: all 0.3s;
+    }
+    
+    table tr:hover {
+      background-color: #f1f1f1;
+    }
+    
+    /* Update styles */
+    .update-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+    
+    .regular-update {
+      background-color: #0056b3;
+      color: white;
+    }
+    
+    .security-update {
+      background-color: #bb0000;
+      color: white;
+    }
+    
     .update-details {
       max-height: 300px;
       overflow-y: auto;
@@ -600,7 +1362,7 @@
     });
   </script>
 </body>
-</html>
+</html> #}
 
 
 
