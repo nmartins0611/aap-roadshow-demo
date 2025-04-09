@@ -1,6 +1,6 @@
 ---
 - name: Update all packages on RHEL systems
-  hosts: node01  # Target inventory group containing your RHEL servers
+  hosts: node01.nostromo.io  # Target inventory group containing your RHEL servers
   become: true         # Run as root
   gather_facts: true   # Gather system information
 
