@@ -13,6 +13,5 @@
       condition: event.payload.server_name == 'node01'
       action:
        run_job_template:
-        organization: "Default"
         name: "Update RHEL"
         post_events: true
