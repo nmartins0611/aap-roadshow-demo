@@ -14,4 +14,5 @@
       action:
        run_job_template:
         name: "Update RHEL"
+        organization: "Default"
         post_events: true
