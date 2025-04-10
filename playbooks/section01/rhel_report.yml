@@ -136,7 +136,7 @@
     - name: Copy application files to shared storage
       ansible.builtin.copy:
         src: "{{ outdir }}/report.html"
-        dest: /opt/ansible-proxy/templates
+        dest: /var/www/html ##/opt/ansible-proxy/templates
         remote_src: true
         force: yes
       delegate_to: node03
