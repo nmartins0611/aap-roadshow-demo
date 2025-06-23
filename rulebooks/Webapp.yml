@@ -3,7 +3,7 @@
   hosts: all
   sources:
    - ansible.eda.kafka:
-       host: broker
+       host: podman-rippley.demoredhat.com
        port: 9092
        topic: network
 
